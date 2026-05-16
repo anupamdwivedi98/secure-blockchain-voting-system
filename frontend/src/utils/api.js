@@ -1,4 +1,4 @@
-const BASE = "http://localhost:5000/api";
+const BASE = "https://secure-blockchain-voting-system.onrender.com/api";
 
 async function req(path, options = {}) {
   const res = await fetch(BASE + path, {
