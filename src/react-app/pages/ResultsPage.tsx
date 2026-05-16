@@ -3,30 +3,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/react-app/components
 import { Button } from "@/react-app/components/ui/button";
 import { RefreshCw, Users } from "lucide-react";
 
-interface Results {
-  A: number;
-  B: number;
-  C: number;
-}
+// interface Results {
+//   A: number;
+//   B: number;
+//   C: number;
+// }
 
 export default function ResultsPage() {
-  const [results, setResults] = useState<Results>({ A: 0, B: 0, C: 0 });
+  const [results, setResults] = useState<{ 
+  name: string;
+  votes: number;
+  percentage: number;
+  }[]>([]);
   const [totalVotes, setTotalVotes] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchResults = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/results");
-      const data = await response.json();
-      setResults(data.results);
-      setTotalVotes(data.totalVotes);
-    } catch (error) {
-      console.error("Failed to fetch results:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/api/results");
+
+    const data = await response.json();
+
+    console.log(data);
+
+    setResults(data.results || []);
+    setTotalVotes(data.total_votes || 0);
+
+  } catch (error) {
+    console.error("Failed to fetch results:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchResults();
@@ -38,21 +48,29 @@ export default function ResultsPage() {
   };
 
   const getWinner = () => {
-    if (totalVotes === 0) return null;
-    const max = Math.max(results.A, results.B, results.C);
-    const winners = Object.entries(results)
-      .filter(([, count]) => count === max)
-      .map(([candidate]) => candidate);
-    return winners.length === 1 ? winners[0] : null;
-  };
+  if (results.length === 0) return null;
+
+  const maxVotes = Math.max(
+    ...results.map((c) => c.votes)
+  );
+
+  const winners = results.filter(
+    (c) => c.votes === maxVotes
+  );
+
+  return winners.length === 1
+    ? winners[0].name
+    : null;
+};
 
   const winner = getWinner();
 
-  const candidateColors = {
-    A: "bg-chart-1",
-    B: "bg-chart-2",
-    C: "bg-chart-3",
-  };
+  const candidateColors: Record<string, string> = {
+  B: "bg-orange-500",
+  C: "bg-blue-500",
+  A: "bg-green-500",
+  S: "bg-red-500",
+};
 
   return (
     <div className="space-y-6">
@@ -80,26 +98,26 @@ export default function ResultsPage() {
       </Card>
 
       <div className="grid gap-4">
-        {(["A", "B", "C"] as const).map((candidate) => {
-          const count = results[candidate];
+        {results.map((candidate) => {
+          const count = candidate.votes;
           const percentage = getPercentage(count);
-          const isWinner = winner === candidate;
+          const isWinner = winner === candidate.name;
 
           return (
             <Card
-              key={candidate}
+              key={candidate.name}
               className={`transition-all ${isWinner ? "ring-2 ring-primary" : ""}`}
             >
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`w-10 h-10 rounded-lg ${candidateColors[candidate]} flex items-center justify-center`}
+                      className={`w-14 h-14 rounded-lg ${candidateColors[candidate.name.charAt(0)]} flex items-center justify-center shrink-0`}
                     >
-                      <span className="text-white font-bold">{candidate}</span>
+                      <span className="text-white font-bold text-xs">{candidate.name}</span>
                     </div>
                     <div>
-                      <p className="font-semibold">Candidate {candidate}</p>
+                      <p className="font-semibold">{candidate.name}</p>
                       {isWinner && (
                         <span className="text-xs text-primary font-medium">Leading</span>
                       )}
@@ -112,7 +130,7 @@ export default function ResultsPage() {
                 </div>
                 <div className="h-3 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${candidateColors[candidate]} transition-all duration-500`}
+                    className={`h-full ${candidateColors[candidate.name.charAt(0)]} transition-all duration-500`}
                     style={{ width: `${percentage}%` }}
                   />
                 </div>

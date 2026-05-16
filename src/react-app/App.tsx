@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import VotePage from "@/react-app/pages/VotePage";
 import ResultsPage from "@/react-app/pages/ResultsPage";
 import BlockchainPage from "@/react-app/pages/BlockchainPage";

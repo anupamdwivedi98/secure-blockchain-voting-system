@@ -3,6 +3,7 @@ import { Button } from "@/react-app/components/ui/button";
 import { Input } from "@/react-app/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/react-app/components/ui/card";
 import { CheckCircle2, AlertCircle, User } from "lucide-react";
+// import { blockchain } from "../blockchain";
 
 export default function VotePage() {
   const [voterId, setVoterId] = useState("");
@@ -22,10 +23,10 @@ export default function VotePage() {
     setStatus({ type: null, message: "" });
 
     try {
-      const response = await fetch("/api/vote", {
+      const response = await fetch("http://127.0.0.1:5000/api/vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ voterId: voterId.trim(), candidate }),
+        body: JSON.stringify({ voter_id: voterId.trim(), party: candidate }),
       });
 
       const data = await response.json();
@@ -83,7 +84,7 @@ export default function VotePage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
-            {["A", "B", "C"].map((candidate) => (
+            {["BJP", "Congress", "AAP", "SP", "BSP"].map((candidate) => (
               <Button
                 key={candidate}
                 onClick={() => handleVote(candidate)}
